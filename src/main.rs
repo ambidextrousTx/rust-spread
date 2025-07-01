@@ -8,6 +8,6 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "rust-spread",
         options,
-        Box::new(|_cc| Ok(Box::new(SpreadsheetApp::default()))),
+        Box::new(|_cc| Ok(Box::new(SpreadsheetApp::new(50, 50)))),
     )
 }

@@ -3,18 +3,39 @@ use eframe::egui;
 
 #[derive(Default)]
 pub struct SpreadsheetApp {
+    rows: usize,
+    cols: usize,
     pub cells: Vec<Vec<String>>,
 }
 
 impl eframe::App for SpreadsheetApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            // Your spreadsheet UI code here
+            egui::ScrollArea::both().show(ui, |ui| {
+                egui::Grid::new("Sheet 1")
+                .striped(true)
+                .show(ui, |ui| {
+                    for row in 0..self.rows {
+                        for col in 0..self.cols {
+                            ui.text_edit_singleline(&mut self.cells[row][col]);
+                        }
+                        ui.end_row();
+                    }
+                });
+            });
         });
     }
 }
 
 impl SpreadsheetApp {
+    pub fn new(rows: usize, cols: usize) -> Self {
+        Self {
+            rows,
+            cols,
+            cells: vec![vec![String::new(); cols]; rows],
+        }
+    }
+
     pub fn get_cell(&self, row: usize, col: usize) -> Option<&str> {
         self.cells.get(row).and_then(|r| r.get(col)).map(|s| s.as_str())
     }
