@@ -11,6 +11,13 @@ pub struct SpreadsheetApp {
 impl eframe::App for SpreadsheetApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                ui.visuals_mut().selection.bg_fill = ui.visuals_mut().window_fill();
+                ui.selectable_label(true, "Sheet 1")
+            });
+
+            ui.separator();
+
             egui::ScrollArea::both().show(ui, |ui| {
                 egui::Grid::new("Sheet 1")
                 .striped(true)
