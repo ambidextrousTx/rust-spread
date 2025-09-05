@@ -1,5 +1,4 @@
 extern crate eframe;
-use eframe::egui;
 mod app;
 use app::SpreadsheetApp;
 
@@ -8,6 +7,6 @@ fn main() -> Result<(), eframe::Error> {
     eframe::run_native(
         "rust-spread",
         options,
-        Box::new(|_cc| Ok(Box::new(SpreadsheetApp::new(50, 50)))),
+        Box::new(|_cc| Ok(Box::new(SpreadsheetApp::new(50, 50, 1)))),
     )
 }

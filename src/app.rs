@@ -5,15 +5,29 @@ use eframe::egui;
 pub struct SpreadsheetApp {
     rows: usize,
     cols: usize,
-    pub cells: Vec<Vec<String>>,
+    num_tabs: usize,
+    pub cells: Vec<Vec<Vec<String>>>,
+    pub tabs: Vec<String>,
+    selected_tab: usize
 }
 
 impl eframe::App for SpreadsheetApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.horizontal(|ui| {
-                ui.visuals_mut().selection.bg_fill = ui.visuals_mut().window_fill();
-                ui.selectable_label(true, "Sheet 1")
+                for (i, tab_title) in self.tabs.iter().enumerate() {
+                    if ui.selectable_label(self.selected_tab == i, tab_title).clicked() {
+                        self.selected_tab = i;
+                    }
+                }
+
+                ui.add_space(8.0);
+                if ui.button("➕").clicked() {
+                    let tab_num = self.tabs.len() + 1;
+                    self.tabs.push(format!("Sheet {}", tab_num));
+                    self.cells.push(vec![vec![String::new(); self.cols]; self.rows]);
+                    self.selected_tab = self.tabs.len() - 1; // Switch to new tab
+                }
             });
 
             ui.separator();
@@ -22,11 +36,13 @@ impl eframe::App for SpreadsheetApp {
                 egui::Grid::new("Sheet 1")
                 .striped(true)
                 .show(ui, |ui| {
-                    for row in 0..self.rows {
-                        for col in 0..self.cols {
-                            ui.text_edit_singleline(&mut self.cells[row][col]);
+                    for tab in 0..self.num_tabs {
+                        for row in 0..self.rows {
+                            for col in 0..self.cols {
+                                ui.text_edit_singleline(&mut self.cells[tab][row][col]);
+                            }
+                            ui.end_row();
                         }
-                        ui.end_row();
                     }
                 });
             });
@@ -35,16 +51,19 @@ impl eframe::App for SpreadsheetApp {
 }
 
 impl SpreadsheetApp {
-    pub fn new(rows: usize, cols: usize) -> Self {
+    pub fn new(rows: usize, cols: usize, num_tabs: usize) -> Self {
         Self {
             rows,
             cols,
-            cells: vec![vec![String::new(); cols]; rows],
+            num_tabs,
+            cells: vec![vec![vec![String::new(); cols]; rows]],
+            tabs: vec!["Sheet 1".to_owned()],
+            selected_tab: 0
         }
     }
 
-    pub fn get_cell(&self, row: usize, col: usize) -> Option<&str> {
-        self.cells.get(row).and_then(|r| r.get(col)).map(|s| s.as_str())
+    pub fn get_cell(&self, row: usize, col: usize, tab: usize) -> Option<&str> {
+        self.cells.get(tab).and_then(|t| t.get(row)).and_then(|r| r.get(col)).map(|s| s.as_str())
     }
 }
 
@@ -55,10 +74,10 @@ mod tests {
     #[test]
     fn test_get_cell() {
         let mut app = SpreadsheetApp::default();
-        app.cells = vec![
+        app.cells = vec![vec![
             vec!["A1".to_string(), "B1".to_string()],
             vec!["A2".to_string(), "B2".to_string()],
-        ];
+        ]];
 
         assert_eq!(app.get_cell(0, 0), Some("A1"));
         assert_eq!(app.get_cell(1, 1), Some("B2"));
