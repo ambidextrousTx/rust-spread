@@ -62,9 +62,13 @@ impl SpreadsheetApp {
         }
     }
 
-    pub fn get_cell(&self, row: usize, col: usize, tab: usize) -> Option<&str> {
-        self.cells.get(tab).and_then(|t| t.get(row)).and_then(|r| r.get(col)).map(|s| s.as_str())
+    pub fn get_cell(&self, tab: usize, row: usize, col: usize) -> Option<&str> {
+        self.cells.get(tab)
+            .and_then(|sheet| sheet.get(row))
+            .and_then(|row| row.get(col))
+            .map(|cell| cell.as_str())
     }
+
 }
 
 #[cfg(test)]
@@ -79,9 +83,9 @@ mod tests {
             vec!["A2".to_string(), "B2".to_string()],
         ]];
 
-        assert_eq!(app.get_cell(0, 0), Some("A1"));
-        assert_eq!(app.get_cell(1, 1), Some("B2"));
-        assert_eq!(app.get_cell(2, 0), None); // Out of bounds
+        assert_eq!(app.get_cell(0, 0, 0), Some("A1"));
+        assert_eq!(app.get_cell(0, 0, 1), Some("B1"));
+        assert_eq!(app.get_cell(0, 2, 0), None); // Out of bounds
     }
 }
 
